@@ -1,15 +1,15 @@
 package com.example.myapplication6.Database;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
-@Entity(primaryKeys = {"modelNAME", "date"})
-public class TotalMedal {
-       // public int modelNO;
+@Entity(primaryKeys = {"modelNO", "date"})
+public class TotalMedalTable {
        @NonNull
-        public String modelNAME;
+        public int modelNO;
         public int date;
         public int diff;
 }

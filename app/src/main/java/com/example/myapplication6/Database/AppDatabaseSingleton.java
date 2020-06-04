@@ -12,7 +12,7 @@ public class AppDatabaseSingleton {
         if(instance != null){
             return instance;
         }
-        instance = Room.databaseBuilder(context,AppDatabase.class,"appdatabase2").build();
+        instance = Room.databaseBuilder(context,AppDatabase.class,"appdatabase7").build();
                 //build(); allowMainThreadQueries()
 
         return instance;

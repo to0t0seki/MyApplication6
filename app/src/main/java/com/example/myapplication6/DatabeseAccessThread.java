@@ -1,29 +1,41 @@
 package com.example.myapplication6;
 
 import com.example.myapplication6.Database.AppDatabase;
-import com.example.myapplication6.Database.AppDatabaseSingleton;
-import com.example.myapplication6.Database.TotalMedal;
+import com.example.myapplication6.Database.TotalIO;
 
+
+import java.lang.reflect.Field;
+import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DatabeseAccessThread extends Thread {
     AppDatabase appDatabase;
     int date;
+    String status;
     CallbackInstance callbackInstance;
 
     interface CallbackInstance{
-        void callbackMethod(List<TotalMedal> list);
+        void callbackMethod(List<?> list);
     }
 
-    public DatabeseAccessThread setCallbackInsetance(AppDatabase appDatabase,int date,CallbackInstance callbackInsetance){
+    public DatabeseAccessThread setCallbackInsetance(AppDatabase appDatabase,int date,String status,CallbackInstance callbackInsetance){
         this.callbackInstance = callbackInsetance;
         this.appDatabase = appDatabase;
         this.date = date;
+        this.status = status;
         return this;
     }
+
+
     @Override
     public void run() {
-        List<TotalMedal> list = appDatabase.allDao().queryDATE(date);
+        List<?> list;
+        if(status=="slot"){
+            list = appDatabase.allDao().querySlotDATE(date);
+        }else {
+            list = appDatabase.allDao().queryPachiDATE(date);
+        }
         callbackInstance.callbackMethod(list);
     }
 }

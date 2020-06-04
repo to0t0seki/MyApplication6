@@ -30,7 +30,7 @@ public class KizunaThread extends Thread {
 
             for (Element element : elements) {
                 String serialNO = element.text();
-                Document oneDocument = Jsoup.connect("https://papimo.jp/h/00041817/hit/view/"+ serialNO + "/20200601").timeout(10000).get();
+                Document oneDocument = Jsoup.connect("https://papimo.jp/h/00041817/hit/view/"+ serialNO + "/20200603").timeout(10000).get();
 
 
                 Elements historyTR = oneDocument.select(".history tr");
@@ -115,7 +115,7 @@ public class KizunaThread extends Thread {
                     Ibc+=1;
                     BCType = "I";
                 }
-                rate += Double.parseDouble(list.get(2)) * 0.144 + 26.7;
+                rate += Double.parseDouble(list.get(2)) * 0.00144 + 0.267;
                 hamariG += Integer.parseInt(list.get(2));
                 hamariBC += 1;
 
@@ -123,7 +123,7 @@ public class KizunaThread extends Thread {
             }else if(list.get(4).equals("BIG") && Integer.parseInt(list.get(2)) > 1){
                 //天井処理
                 Tbc += 1;
-                rate += Double.parseDouble(list.get(2)) * 0.144 + 26.7;
+                rate += Double.parseDouble(list.get(2)) * 0.00144 + 0.267;
                 hamariG = 0;
                 hamariBC = 0;
                 BCType = "T";
