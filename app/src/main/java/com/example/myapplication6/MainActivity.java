@@ -15,27 +15,20 @@ import android.widget.LinearLayout;
 
 import com.example.myapplication6.Database.AppDatabase;
 import com.example.myapplication6.Database.AppDatabaseSingleton;
-import com.example.myapplication6.Database.TotalIO;
 
-import org.jsoup.select.Evaluator;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+
 import java.util.Calendar;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-
-    @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
         LinearLayout baseLayout = findViewById(R.id.baselayout);
 

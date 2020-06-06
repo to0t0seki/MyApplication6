@@ -33,6 +33,14 @@ public class ModelListActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        Button saraban2Button = new Button(this);
+        saraban2Button.setText("サラ番2");
+        saraban2Button.setOnClickListener((v)->{
+            intent.setClass(this,DetailActivity.class);
+            intent.putExtra("model","saraban2");
+            startActivity(intent);
+        });
+
         Button jagButton = new Button(this);
         jagButton.setOnClickListener((v)->{
             intent.setClass(this,DetailActivity.class);
@@ -69,6 +77,7 @@ public class ModelListActivity extends AppCompatActivity {
         });
 
         baseLayout.addView(kizunaButton);
+        baseLayout.addView(saraban2Button);
         baseLayout.addView(jagButton);
         baseLayout.addView(spinner);
 

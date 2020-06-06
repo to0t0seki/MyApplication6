@@ -17,20 +17,26 @@ import java.util.TreeMap;
 public class KizunaThread extends Thread {
     CallbackInstance callbackInstance;
 
+    interface CallbackInstance{
+        void callbackMethod(Map<String, Map<String, Integer>> resultMap,String updateTime);
+    }
 
+    public KizunaThread setCallbackInstance(CallbackInstance callbackInstance) {
+        this.callbackInstance = callbackInstance;
+        return this;
+    }
 
     @Override
     public void run() {
         Map<String,Map<String,Integer>> resultMap = new TreeMap<>();
         Map<String,Integer> diffMap = getDiff();
+        String updateTime = getUpdateTime();
         try {
             Document document = Jsoup.connect(" https://papimo.jp/h/00041817/hit/index_sort/220010002/1-20-266966").timeout(10000).get();
             Elements elements = document.select(".unit_no");
-
-
             for (Element element : elements) {
                 String serialNO = element.text();
-                Document oneDocument = Jsoup.connect("https://papimo.jp/h/00041817/hit/view/"+ serialNO + "/20200603").timeout(10000).get();
+                Document oneDocument = Jsoup.connect("https://papimo.jp/h/00041817/hit/view/"+ serialNO + "/20200605").timeout(10000).get();
 
 
                 Elements historyTR = oneDocument.select(".history tr");
@@ -64,8 +70,20 @@ public class KizunaThread extends Thread {
             m.put("DIFF",diffMap.get(s));
             resultMap.put(s,m);
         }
-        callbackInstance.callbackMethod(resultMap);
+        callbackInstance.callbackMethod(resultMap,updateTime);
 
+    }
+    static public String getUpdateTime(){
+        try {
+            Document document = Jsoup.connect("https://papimo.jp/h/00041817/hit/index_sort/220010002/1-20-266966/").timeout(10000).get();
+            String time = document.select(".latest").text();
+            int i = time.indexOf("：");
+            time = time.substring(i);
+            return time;
+        }catch (IOException e){
+            System.out.println(e);
+            return null;
+        }
     }
 
     public Map<String,Integer>  getDiff(){
@@ -83,7 +101,6 @@ public class KizunaThread extends Thread {
             System.out.println(e);
         }
         return map;
-
     }
 
     public Map<String, Integer> creatDetailData(List<List<String>> list1, int last){
@@ -115,7 +132,7 @@ public class KizunaThread extends Thread {
                     Ibc+=1;
                     BCType = "I";
                 }
-                rate += Double.parseDouble(list.get(2)) * 0.00144 + 0.267;
+                rate += Double.parseDouble(list.get(2)) * 0.144 + 26.7;
                 hamariG += Integer.parseInt(list.get(2));
                 hamariBC += 1;
 
@@ -123,7 +140,7 @@ public class KizunaThread extends Thread {
             }else if(list.get(4).equals("BIG") && Integer.parseInt(list.get(2)) > 1){
                 //天井処理
                 Tbc += 1;
-                rate += Double.parseDouble(list.get(2)) * 0.00144 + 0.267;
+                rate += Double.parseDouble(list.get(2)) * 0.144 + 26.7;
                 hamariG = 0;
                 hamariBC = 0;
                 BCType = "T";
@@ -155,15 +172,6 @@ public class KizunaThread extends Thread {
         map.put("HBC",hamariBC);
         map.put("RATE",(int) rate);
         return map;
-    }
-
-    interface CallbackInstance{
-        void callbackMethod(Map<String, Map<String, Integer>> resultMap);
-    }
-
-    public KizunaThread setCallbackInstance(CallbackInstance callbackInstance) {
-        this.callbackInstance = callbackInstance;
-        return this;
     }
 
 }

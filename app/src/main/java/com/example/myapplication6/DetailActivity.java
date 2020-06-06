@@ -43,17 +43,37 @@ public class DetailActivity extends AppCompatActivity {
             case "jag":
                 getJag(intent.getStringExtra("kisyu"));
                 break;
+            case "saraban2":
+                getSaraban2();
+                break;
+
         }
     }
 
+    public void getSaraban2(){
+        new GetUnitNOsThread().setCallbackInstance("00041817","220030001",(unitNOs)->{
+            new GetHistoryThread().setCallbackInstance("00041817",unitNOs,(map)->{
+               Map m=  CalcData.saraban2(map);
+               TableLayout tableLayout = CreatTable.getTable(this,m);
+
+               handler.post(()->{
+                   linearLayout.removeAllViews();
+                   linearLayout.addView(tableLayout);
+               });
+
+            }).start();
+        }).start();
+    }
+
+
     public void getKizuna(DataViewModel dataViewModel){
-        new KizunaThread().setCallbackInstance((resultMap)->{
+        new KizunaThread().setCallbackInstance((resultMap,updateTime)->{
             dataViewModel.liveData.postValue(resultMap);
+            dataViewModel.updateTime=updateTime;
         }).start();
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.baselayout,new KizunaFragment());
             fragmentTransaction.commit();
-
     }
 
     public void getJag(String kisyu){
@@ -126,10 +146,6 @@ public class DetailActivity extends AppCompatActivity {
             int total=0;
             int diff=0;
 
-//            int BBTotal=0;
-//            int RBTotal=0;
-//            int totalTotal=0;
-//            int diffTotal=0;
             double k=0;
             for (String status:newMap.get(NO).keySet()){
                 TextView textView = new TextView(this);
@@ -186,7 +202,4 @@ public class DetailActivity extends AppCompatActivity {
         tableLayout.addView(tableRowTotal,1);
         return tableLayout;
     }
-
-
-
 }

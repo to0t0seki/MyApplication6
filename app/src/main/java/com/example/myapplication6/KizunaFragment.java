@@ -29,6 +29,12 @@ public class KizunaFragment extends Fragment {
         dataViewModel.liveData.observe(getViewLifecycleOwner(),(map)->{
             horizontalScrollView.removeAllViews();
             LinearLayout linearLayout = new LinearLayout(getActivity());
+            linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+            TextView updatteTimeText = new TextView(getActivity());
+            updatteTimeText.setText("更新時間:"+dataViewModel.updateTime);
+            linearLayout.addView(updatteTimeText);
+
             TableLayout tableLayout = new TableLayout(getActivity());
             TableRow rowHeader = new TableRow(getActivity());
 

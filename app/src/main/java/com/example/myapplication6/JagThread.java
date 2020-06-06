@@ -45,8 +45,8 @@ public class JagThread extends Thread {
                 Map<String,Integer> mapdetail = new TreeMap<>();
                 for(Element e:trElements){
 
-                    if(e.select("td").eq(2).text()!=""){
-                        mapdetail.put(e.select("td").eq(0).text(),Integer.parseInt(e.select("td").eq(2).text().replace(",","")));
+                    if(e.select("td").eq(1).text()!=""){
+                        mapdetail.put(e.select("td").eq(0).text(),Integer.parseInt(e.select("td").eq(1).text().replace(",","")));
                     }
                 }
                 map.put(s,mapdetail);
