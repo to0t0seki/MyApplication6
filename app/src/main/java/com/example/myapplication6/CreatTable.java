@@ -13,53 +13,42 @@ import java.util.Map;
 public class CreatTable {
 
 
-    public static <T> TableLayout getTable(Context context,Map<Integer,Map<String,Integer>> map)  {
+    public static <T> TableLayout getTable(Context context, GenerateData.OutData outData)  {
         TableLayout tableLayout = new TableLayout(context);
         TableRow tableHeader = new TableRow(context);
-        Iterator<Integer> Itr = map.keySet().iterator();
-        if(Itr.hasNext()){
-            int i = Itr.next();
-            Iterator<String> strItr = map.get(i).keySet().iterator();
-            TextView textViewNO = new TextView(context);
-            textViewNO.setBackgroundResource(R.drawable.border);
-            textViewNO.setGravity(Gravity.CENTER);
-            textViewNO.setWidth(150);
-            textViewNO.setText("NO");
-            tableHeader.addView(textViewNO);
-            while (strItr.hasNext()){
-                TextView textView = new TextView(context);
-                textView.setBackgroundResource(R.drawable.border);
-                textView.setGravity(Gravity.CENTER);
-                textView.setWidth(150);
-                textView.setText(strItr.next());
-                tableHeader.addView(textView);
-            }
-        }else{
-            return tableLayout;
+        Map<String,Map<String,String>> headerMap = outData.headerData;
+        Iterator<String> headerItr = headerMap.keySet().iterator();
+        while (headerItr.hasNext()) {
+            String field = headerItr.next();
+            TextView textView = new TextView(context);
+            textView.setBackgroundResource(R.drawable.border);
+            textView.setGravity(Gravity.CENTER);
+            textView.setWidth(Integer.parseInt(headerMap.get(field).get("width")));
+            textView.setText(field);
+            tableHeader.addView(textView);
         }
-
-
 
         tableLayout.addView(tableHeader);
 
-        Iterator<Integer> NOItr = map.keySet().iterator();
+        Map<Integer,Map<String,Integer>> dataMap = outData.data;
+
+
+        Iterator<Integer> NOItr = dataMap.keySet().iterator();
         while (NOItr.hasNext()) {
             TableRow tableRow = new TableRow(context);
             int NO = NOItr.next();
             TextView textViewNO = new TextView(context);
             textViewNO.setBackgroundResource(R.drawable.border);
             textViewNO.setGravity(Gravity.RIGHT);
-            textViewNO.setWidth(150);
             textViewNO.setText(String.valueOf(NO));
             tableRow.addView(textViewNO);
-            Map<String,Integer> fieldMap = map.get(NO);
+            Map<String,Integer> fieldMap = dataMap.get(NO);
             Iterator<String> fieldItr = fieldMap.keySet().iterator();
             while (fieldItr.hasNext()){
                 String field =fieldItr.next();
                 TextView textView = new TextView(context);
                 textView.setBackgroundResource(R.drawable.border);
                 textView.setGravity(Gravity.RIGHT);
-                textView.setWidth(150);
                 textView.setText(String.valueOf(fieldMap.get(field)));
                 tableRow.addView(textView);
             }

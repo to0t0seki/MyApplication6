@@ -41,7 +41,7 @@ public class GetHistoryThread extends Thread {
     static public Map<Integer,List<Map<String,String>>> getHistorys(String hallNO,List<String> unitNOs){
         Map<Integer,List<Map<String,String>>>historys  = new HashMap<>();
         for(String unitNO:unitNOs){
-            String url = "https://papimo.jp/h/"+hallNO+ "/hit/view/"+ unitNO + "/20200605";
+            String url = "https://papimo.jp/h/"+hallNO+ "/hit/view/"+ unitNO + "/20200607";
             List<Map<String,String>> historyList = new ArrayList<>();
             try{
                 Document document = Jsoup.connect(url).timeout(10000).get();
@@ -61,19 +61,19 @@ public class GetHistoryThread extends Thread {
                     }
                     String last = document.select("#tab-data-some tbody tr").eq(0).select("td").eq(6).text();
                     Map<String,String> map = new HashMap();
-                    map.put("cnt","");
-                    map.put("time","");
+                    map.put("cnt","end");
+                    map.put("time","end");
                     map.put("start",last);
-                    map.put("out","");
-                    map.put("sts","");
+                    map.put("out","end");
+                    map.put("sts","end");
                     historyList.add(map);
                 }else if(document.select(".data tr").eq(1).select("td").eq(5).text()!="-"){
                     Map<String,String> map = new HashMap();
-                    map.put("cnt","");
-                    map.put("time","");
+                    map.put("cnt","end");
+                    map.put("time","end");
                     map.put("start",document.select(".data tr").eq(1).select("td").eq(5).text());
-                    map.put("out","");
-                    map.put("sts","");
+                    map.put("out","end");
+                    map.put("sts","end");
                     historyList.add(map);
                 }
             }catch (IOException e){

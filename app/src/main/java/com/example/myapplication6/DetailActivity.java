@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.Gravity;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
@@ -21,27 +22,32 @@ import java.util.Map;
 public class DetailActivity extends AppCompatActivity {
     Handler handler;
     LinearLayout linearLayout;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         handler = new Handler();
         Intent intent = getIntent();
-        DataViewModel dataViewModel = new ViewModelProvider(this,new ViewModelProvider.NewInstanceFactory()).get(DataViewModel.class);
 
         LinearLayout baseLayout = findViewById(R.id.baselayout);
         ScrollView scrollView = new ScrollView(this);
-        linearLayout = new LinearLayout(this);
         baseLayout.addView(scrollView);
-        scrollView.addView(linearLayout);
+
+        HorizontalScrollView horizontalScrollView = new HorizontalScrollView(this);
+        scrollView.addView(horizontalScrollView);
+
+        linearLayout = new LinearLayout(this);
+        horizontalScrollView.addView(linearLayout);
+
 
         String modelNAME = intent.getStringExtra("model");
         switch (modelNAME){
             case "kizuna":
-                getKizuna(dataViewModel);
+                getKizuna();
                 break;
             case "jag":
-                getJag(intent.getStringExtra("kisyu"));
+                getJag();
                 break;
             case "saraban2":
                 getSaraban2();
@@ -52,9 +58,9 @@ public class DetailActivity extends AppCompatActivity {
 
     public void getSaraban2(){
         new GetUnitNOsThread().setCallbackInstance("00041817","220030001",(unitNOs)->{
-            new GetHistoryThread().setCallbackInstance("00041817",unitNOs,(map)->{
-               Map m=  CalcData.saraban2(map);
-               TableLayout tableLayout = CreatTable.getTable(this,m);
+            new GetHistoryThread().setCallbackInstance("00041817",unitNOs,(historys)->{
+               GenerateData.OutData outData =  GenerateData.saraban2(historys);
+               TableLayout tableLayout = CreatTable.getTable(this,outData);
 
                handler.post(()->{
                    linearLayout.removeAllViews();
@@ -66,24 +72,23 @@ public class DetailActivity extends AppCompatActivity {
     }
 
 
-    public void getKizuna(DataViewModel dataViewModel){
-        new KizunaThread().setCallbackInstance((resultMap,updateTime)->{
-            dataViewModel.liveData.postValue(resultMap);
-            dataViewModel.updateTime=updateTime;
+    public void getKizuna(){
+        new GetUnitNOsThread().setCallbackInstance("00041817","220010002",(unitNOs)->{
+            new GetHistoryThread().setCallbackInstance("00041817",unitNOs,(historys)->{
+                GenerateData.OutData outData =  GenerateData.kizuna2(historys);
+                TableLayout tableLayout = CreatTable.getTable(this,outData);
+                handler.post(()->{
+                    linearLayout.removeAllViews();
+                    linearLayout.addView(tableLayout);
+                });
+            }).start();
         }).start();
-            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.baselayout,new KizunaFragment());
-            fragmentTransaction.commit();
     }
 
-    public void getJag(String kisyu){
-        new JagThread().setCallbackInstance(kisyu,(map)->{
-            handler.post(()->{
-                TableLayout tableLayout =getTable(map);
-                linearLayout.removeAllViews();
-                linearLayout.addView(tableLayout);
-            });
-        }).start();
+    public void getJag(){
+        new GetIndex_sort((map)->{
+
+        }).getDataAll("00041817","215060005",Global.date);
     }
 
     public TableLayout getTable(Map<String, Map<String,Integer>>map){
