@@ -1,59 +1,89 @@
 package com.example.myapplication6;
 
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
-public class GetIndex_sort {
+
+public class GetIndex_sort extends Thread {
     CallbackInstance callbackInstance;
+    String hallNO;
+    String modelNO;
+    int date;
+
 
     interface CallbackInstance{
-        void callbackMethod(Map map);
+        void callbackMethod(List<Index_sortData> list);
     }
 
-    GetIndex_sort(CallbackInstance callbackInstance){
+    GetIndex_sort(String hallNO,String modelNO,int date,CallbackInstance callbackInstance){
+        this.hallNO=hallNO;
+        this.modelNO=modelNO;
+        this.date=date;
         this.callbackInstance=callbackInstance;
     }
 
-    public void getData(String hall, String modelNO, String category, int date){
-        SimpleDateFormat simpleDateFormat =new SimpleDateFormat("yyyyMMdd");
-        Calendar calendar = Calendar.getInstance();
-        int today =Integer.parseInt(simpleDateFormat.format(calendar.getTime()));
-        int tdNO = today - date + 1;
-        String url = "https://papimo.jp/h/"+hall+"/hit/index_sort/"+modelNO+"/1-20-269695/"+category;
-        new WebAccessThread(url,(document)->{
-            Elements trElements = document.select("#table-sort tr");
-            trElements.remove(0);
-            Map<String,Integer> mapdetail = new TreeMap<>();
-            for(Element e:trElements){
-                if(e.select("td").eq(tdNO).text()!=""){
-                    mapdetail.put(e.select("td").eq(0).text(),Integer.parseInt(e.select("td").eq(tdNO).text().replace(",","")));
-                }
-            }
-            callbackInstance.callbackMethod(mapdetail);
-        }).start();
+    @Override
+    public void run() {
+        Map<String,Map<Integer,Map<Integer,Integer>>> map = getData(hallNO,modelNO,date);
+        List<Index_sortData>list = generateIndex_sortData(map);
+        callbackInstance.callbackMethod(list);
     }
 
-    public void getDataAll(String hall,String modelNO,int date){
-        Map<String,Map<String,Integer>> map = new LinkedHashMap<>();
-            new GetIndex_sort((map81)->{
-                new GetIndex_sort((map1)->{
-                    new GetIndex_sort((map2)->{
-                        new GetIndex_sort((map6)->{
-                            map.put("81/0",map81);
-                            map.put("1/0",map1);
-                            map.put("2/0",map2);
-                            map.put("6/0",map6);
-                            callbackInstance.callbackMethod(map);
-                        }).getData(hall,modelNO,"6/1",date);
-                    }).getData(hall,modelNO,"2/0",date);
-                }).getData(hall,modelNO,"1/0",date);
-            }).getData(hall,modelNO,"81/1",date);
+    public static List<Index_sortData> generateIndex_sortData(Map<String,Map<Integer,Map<Integer,Integer>>> map){
+        Map<Integer,Map<Integer,Map<String,Integer>>> newMap = ChangeMap4.change(map);
+        List<Index_sortData> list = new ArrayList<>();
+        for (int date:newMap.keySet()){
+            for(int no:newMap.get(date).keySet()){
+                Index_sortData index_sortData = new Index_sortData();
+                index_sortData.date=date;
+                index_sortData.no = no;
+                index_sortData.diff = newMap.get(date).get(no).get("81/1");
+                index_sortData.bb=newMap.get(date).get(no).get("1/0");
+                index_sortData.rb=newMap.get(date).get(no).get("2/0");
+                index_sortData.total=newMap.get(date).get(no).get("6/0");
+                list.add(index_sortData);
+            }
+        }
+        return list;
+    }
+
+    public Map<String,Map<Integer,Map<Integer,Integer>>> getData(String hall, String modelNO, int date){
+        String[] categorys = {"1/0","2/0","6/0","81/1"};
+        Map<String,Map<Integer,Map<Integer,Integer>>> cateMap = new HashMap<>();
+        for(String category:categorys){
+            String url = "https://papimo.jp/h/"+hall+"/hit/index_sort/"+modelNO+"/1-20-269695/"+category;
+            try {
+                Document document = Jsoup.connect(url).timeout(8000).get();
+                Elements trElements = document.select("#table-sort tr");
+                trElements.remove(0);
+                Map<Integer,Map<Integer,Integer>> NOMap = new HashMap<>();
+                for(Element trElement:trElements){
+                    Elements tdElements = trElement.select("td");
+                    String NO = tdElements.remove(0).text();
+                    Map<Integer,Integer> dateMap = new HashMap<>();
+                    int tmpDate = date;
+                    for (Element tdElement:tdElements){
+                        if(tdElement.text()!=""){
+                            dateMap.put(tmpDate,Integer.parseInt(tdElement.text().replace(",","")));
+                            tmpDate-=1;
+                        }
+                    }
+                    NOMap.put(Integer.parseInt(NO),dateMap);
+                }
+                cateMap.put(category,NOMap);
+            }catch (IOException e){
+                System.out.println(e);
+            }
+        }
+        return cateMap;
     }
 }

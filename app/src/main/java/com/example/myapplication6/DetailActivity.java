@@ -59,13 +59,13 @@ public class DetailActivity extends AppCompatActivity {
     public void getSaraban2(){
         new GetUnitNOsThread().setCallbackInstance("00041817","220030001",(unitNOs)->{
             new GetHistoryThread().setCallbackInstance("00041817",unitNOs,(historys)->{
-               GenerateData.OutData outData =  GenerateData.saraban2(historys);
-               TableLayout tableLayout = CreatTable.getTable(this,outData);
-
-               handler.post(()->{
-                   linearLayout.removeAllViews();
-                   linearLayout.addView(tableLayout);
-               });
+//               GenerateData.OutData outData =  GenerateData.saraban2(historys);
+//               TableLayout tableLayout = CreatTable.getTable(this,outData);
+//
+//               handler.post(()->{
+//                   linearLayout.removeAllViews();
+//                   linearLayout.addView(tableLayout);
+//               });
 
             }).start();
         }).start();
@@ -74,21 +74,21 @@ public class DetailActivity extends AppCompatActivity {
 
     public void getKizuna(){
         new GetUnitNOsThread().setCallbackInstance("00041817","220010002",(unitNOs)->{
-            new GetHistoryThread().setCallbackInstance("00041817",unitNOs,(historys)->{
-                GenerateData.OutData outData =  GenerateData.kizuna2(historys);
-                TableLayout tableLayout = CreatTable.getTable(this,outData);
-                handler.post(()->{
-                    linearLayout.removeAllViews();
-                    linearLayout.addView(tableLayout);
-                });
-            }).start();
+//            new GetHistoryThread().setCallbackInstance("00041817",unitNOs,(historys)->{
+//                OutData outData =  GenerateOutData.kizuna2(historys);
+//                TableLayout tableLayout = CreatTable.getTable(this,outData);
+//                handler.post(()->{
+//                    linearLayout.removeAllViews();
+//                    linearLayout.addView(tableLayout);
+//                });
+//            }).start();
         }).start();
     }
 
     public void getJag(){
-        new GetIndex_sort((map)->{
+        new GetIndex_sort("00041817","220010002",Global.date,(map)->{
 
-        }).getDataAll("00041817","215060005",Global.date);
+        }).start();
     }
 
     public TableLayout getTable(Map<String, Map<String,Integer>>map){
@@ -135,7 +135,7 @@ public class DetailActivity extends AppCompatActivity {
             tableHeader.addView(textView);
         }
         tableLayout.addView(tableHeader);
-        Map<String,Map<String,Integer>> newMap = ChangeMap.change(map);
+        Map<String,Map<String,Integer>> newMap = ChangeMap3.change(map);
         int[] totals = {0,0,0,0};
         for(String NO:newMap.keySet()){
             TableRow tableRow = new TableRow(this);

@@ -13,18 +13,17 @@ import java.util.Map;
 public class CreatTable {
 
 
-    public static <T> TableLayout getTable(Context context, GenerateData.OutData outData)  {
+    public static <T> TableLayout getTable(Context context, OutData outData)  {
         TableLayout tableLayout = new TableLayout(context);
         TableRow tableHeader = new TableRow(context);
-        Map<String,Map<String,String>> headerMap = outData.headerData;
-        Iterator<String> headerItr = headerMap.keySet().iterator();
-        while (headerItr.hasNext()) {
-            String field = headerItr.next();
+        Iterator<Column> columnIterator = outData.columns.iterator();
+        while (columnIterator.hasNext()) {
+            Column column = columnIterator.next();
             TextView textView = new TextView(context);
             textView.setBackgroundResource(R.drawable.border);
             textView.setGravity(Gravity.CENTER);
-            textView.setWidth(Integer.parseInt(headerMap.get(field).get("width")));
-            textView.setText(field);
+            textView.setWidth(column.width);
+            textView.setText(column.name);
             tableHeader.addView(textView);
         }
 
