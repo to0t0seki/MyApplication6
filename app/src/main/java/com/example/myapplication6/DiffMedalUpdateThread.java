@@ -38,18 +38,8 @@ public class DiffMedalUpdateThread extends Thread {
     @Override
     public void run() {
 
-        List<TotalMedalTable> totalMedalTables = new ArrayList<>();
-        //modelNOListを返す。
-        List<String>list = getMachineNOs(status);
-        for(String modelNO:list){
-            //URLNOを与えてアクセス
-            int total =getTotal(modelNO,status);
-            TotalMedalTable totalMedalTable = new TotalMedalTable();
-            totalMedalTable.date=date;
-            totalMedalTable.diff=total;
-            totalMedalTable.modelNO=Integer.parseInt(modelNO);
-            totalMedalTables.add(totalMedalTable);
-        }
+        List<String>list = getModelNOs(status);
+        List<TotalMedalTable> totalMedalTables = getTotalAll(list,status,date);
         insertDatabase(totalMedalTables,appDatabase,handler,context);
     }
 
@@ -61,11 +51,11 @@ public class DiffMedalUpdateThread extends Thread {
 
     }
 
-    static public List<String> getMachineNOs(String status){
+    static public List<String> getModelNOs(String status){
         List<String> modelList = new ArrayList<>();
         String url = "https://papimo.jp/h/00041817/hit/index_machine/"+status+"/";
         try {
-            Document document = Jsoup.connect(url).timeout(10000).get();
+            Document document = Jsoup.connect(url).timeout(5000).get();
             String maxpage = document.select("#max_page").val();
             for (int i = 0; i < Integer.parseInt(maxpage); i++) {
                 document = Jsoup.connect(url + "?page=" + String.valueOf((i + 1))).timeout(10000).get();
@@ -83,22 +73,52 @@ public class DiffMedalUpdateThread extends Thread {
         return modelList;
     }
 
-    static public int getTotal(String modelNO,String status){
-        String url = "https://papimo.jp/h/00041817/hit/index_sort/"+modelNO+"/" + status + "/81/1";
-        int total=0;
-        Document document=null;
+    static private Map<Integer,Map<Integer,Integer>> getTotal(String modelNo,String status,int date){
+        Map<Integer,Map<Integer,Integer>> NoMap = new HashMap<>();
+        String url = "https://papimo.jp/h/00041817/hit/index_sort/"+modelNo+"/" + status + "/81/1";
         try {
-            document = Jsoup.connect(url).timeout(10000).get();
+            Document document = Jsoup.connect(url).timeout(5000).get();
+            Elements trElements = document.select("#table-sort tr");
+            trElements.remove(0);
+            for(Element trElement:trElements){
+                Elements tdElements = trElement.select("td");
+                int No = Integer.parseInt(tdElements.remove(0).text());
+                Map<Integer,Integer> dateMap = new HashMap<>();
+                int datetmp = date;
+                for(Element tdElement:tdElements){
+                    if(tdElement.text()!=""){
+                        dateMap.put(datetmp,Integer.parseInt(tdElement.text().replace(",","")));
+                    }
+                    datetmp--;
+                }
+                NoMap.put(No,dateMap);
+            }
         }catch (IOException e){
             System.out.println(e);
         }
-        Elements trElements = document.select("#table-sort tr");
-        trElements.remove(0);
-        for(Element e:trElements){
-            if(e.select("td").eq(1).text()!=""){
-                total +=Integer.parseInt(e.select("td").eq(1).text().replace(",",""));
+        return NoMap;
+    }
+
+    static public List<TotalMedalTable> getTotalAll(List<String>list,String status,int date){
+        List<TotalMedalTable> totalMedalTables = new ArrayList<>();
+        for(String modelNO:list) {
+            Map<Integer,Map<Integer,Integer>> unitNoMap =getTotal(modelNO,status,date);
+            Map<Integer,Map<Integer,Integer>> newMap = ChangeMap3.change(unitNoMap);
+
+            for(Map.Entry<Integer,Map<Integer,Integer>> dateEntry:newMap.entrySet()){
+                int total=0;
+                for(Map.Entry<Integer,Integer> noEntry :dateEntry.getValue().entrySet()){
+                    total =noEntry.getValue();
+
+                }
+                TotalMedalTable totalMedalTable = new TotalMedalTable();
+                totalMedalTable.date=dateEntry.getKey();
+                totalMedalTable.diff=total;
+                totalMedalTable.modelNO=Integer.parseInt(modelNO);
+                totalMedalTables.add(totalMedalTable);
             }
         }
-        return total;
+        return totalMedalTables;
     }
 }
+

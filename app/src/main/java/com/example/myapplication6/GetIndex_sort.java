@@ -1,6 +1,8 @@
 package com.example.myapplication6;
 
 
+import android.widget.TableLayout;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -8,6 +10,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +24,7 @@ public class GetIndex_sort extends Thread {
 
 
     interface CallbackInstance{
-        void callbackMethod(List<Index_sortData> list);
+        void callbackMethod(List<List<Object>> tableList);
     }
 
     GetIndex_sort(String hallNO,String modelNO,int date,CallbackInstance callbackInstance){
@@ -33,9 +36,57 @@ public class GetIndex_sort extends Thread {
 
     @Override
     public void run() {
-        Map<String,Map<Integer,Map<Integer,Integer>>> map = getData(hallNO,modelNO,date);
+        Map<String,Map<Integer,Map<Integer,Integer>>> map = getData(hallNO,modelNO,Global.date);
         List<Index_sortData>list = generateIndex_sortData(map);
-        callbackInstance.callbackMethod(list);
+        List<Index_sortData>dateList = getDateData(list,date);
+        List<List<Object>> tablelist = generateTable(dateList);
+        callbackInstance.callbackMethod(tablelist);
+    }
+
+    static public List<List<Object>>  generateTable(List<Index_sortData>list){
+        Collections.sort(list,(i1,i2)->{return i1.no-i2.no;});
+        List<List<Object>> tableList = new ArrayList<>();
+        int totalTotal=0;
+        int bbTotal=0;
+        int rbTotal=0;
+        int diffTotal=0;
+        for (Index_sortData index_sortData:list){
+            List<Object> TRList = new ArrayList<>();
+            double k =(double) index_sortData.total/((index_sortData.bb*312 + index_sortData.rb*104)-index_sortData.diff)*50;
+            k = ((double)Math.round(k * 100))/100;
+            TRList.add(index_sortData.no);
+            TRList.add(index_sortData.total);
+            TRList.add(index_sortData.bb);
+            TRList.add(index_sortData.rb);
+            TRList.add(index_sortData.diff);
+            TRList.add(k);
+
+            totalTotal+=index_sortData.total;
+            bbTotal+=index_sortData.bb;
+            rbTotal+=index_sortData.rb;
+            diffTotal+=index_sortData.diff;
+
+            tableList.add(TRList);
+        }
+        List<Object> TRList = new ArrayList<>();
+        TRList.add("");
+        TRList.add(totalTotal);
+        TRList.add(bbTotal);
+        TRList.add(rbTotal);
+        TRList.add(diffTotal);
+        tableList.add(TRList);
+        return tableList;
+
+
+    }
+    static public List<Index_sortData> getDateData(List<Index_sortData>list,int date){
+        List<Index_sortData> newindex_sortData = new ArrayList<>();
+        for(Index_sortData index_sortData:list){
+            if(index_sortData.date==date){
+                newindex_sortData.add(index_sortData);
+            }
+        }
+        return newindex_sortData;
     }
 
     public static List<Index_sortData> generateIndex_sortData(Map<String,Map<Integer,Map<Integer,Integer>>> map){

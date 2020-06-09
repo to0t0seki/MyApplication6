@@ -1,258 +1,203 @@
 package com.example.myapplication6;
 
+
+import com.example.myapplication6.Data.Kizuna2;
+import com.example.myapplication6.Data.Saraban2;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-
 public class GenerateOutData {
 
-    static public OutData jagData(Map<Integer,Map<String,Integer>>map){
-        List<Column> columns = new ArrayList<>();
-        String[] headerName = {"NO","Total","BB","RB","Diff"};
-        for (String s:headerName){
-            switch (s){
-                case "NO":
-                    Column column1 = new Column();
-                    column1.name= s;
-                    column1.total=false;
-                    column1.width=80;
-                    columns.add(column1);
-                    break;
-                case "Total":
-                case "Diff":
-                    Column column2 = new Column();
-                    column2.name= s;
-                    column2.total=true;
-                    column2.width=150;
-                    columns.add(column2);
-                    break;
-                case "BB":
-                case "RB":
-                    Column column3 = new Column();
-                    column3.name= s;
-                    column3.total=true;
-                    column3.width=80;
-                    columns.add(column3);
-                    break;
+
+    static public  List<Kizuna2> getkizuna2List(Map<Integer, List<Map<String,String>>> historys) {
+        
+        List<Kizuna2> kizuna2DataList = new ArrayList<>();
+        
+        Iterator<Integer> NOItr = historys.keySet().iterator();
+        while (NOItr.hasNext()){
+            Kizuna2 kizuna2Data = new Kizuna2();
+            kizuna2Data.no = NOItr.next();
+            Iterator<Map<String,String>> historyItr = historys.get(kizuna2Data.no).iterator();
+            String pre="";
+            while (historyItr.hasNext()) {
+                Map<String, String> history = historyItr.next();
+                if (!history.get("cnt").equals("end")) {
+                    if (Integer.parseInt(history.get("start")) > 1) {
+                        kizuna2Data.total += Integer.parseInt(history.get("start"));
+                        kizuna2Data.hamariG += Integer.parseInt(history.get("start"));
+                        kizuna2Data.hamariBc += 1;
+                        if (kizuna2Data.hamariG > 805) {
+                            kizuna2Data.hamariG = 0;
+                            kizuna2Data.hamariBc = 0;
+                            kizuna2Data.tbc+=1;
+                            pre="TBC";
+                        } else {
+                            if(Integer.parseInt(history.get("out"))>34){
+                                kizuna2Data.dbc+=1;
+                                pre="DBC";
+                            }else{
+                                kizuna2Data.ibc+=1;
+                                pre="IBC";
+                            }
+                        }
+                        kizuna2Data.rate+=Double.parseDouble(history.get("start")) * 0.144 + 26.7;
+                    }else{
+                        kizuna2Data.hamariG=0;
+                        kizuna2Data.hamariBc=0;
+                        if(!pre.equals("BT")){
+                            if (pre.equals("TBC")){
+                                kizuna2Data.tbt+=1;
+                                pre="BT";
+                            }else if(pre.equals("DBC")){
+                                kizuna2Data.dbt+=1;
+                                pre="BT";
+                            }else{
+                                kizuna2Data.ibt+=1;
+                                pre="BT";
+                            }
+                        }
+                    }
+                } else {
+                    kizuna2Data.total += Integer.parseInt(history.get("start"));
+                    kizuna2Data.hamariG += Integer.parseInt(history.get("start"));
+                }
             }
+            kizuna2DataList.add(kizuna2Data);
         }
-        OutData outData = new OutData();
-        outData.columns = columns;
-        outData.data = map;
-        return  outData;
+        return kizuna2DataList;
+    }
+    
+    static public List<List<Object>> genKizuna2Table(List<Kizuna2>kizuna2List){
+        List<List<Object>> objectList = new ArrayList<>();
+        int totalTotal=0;
+        int totalibc=0;
+        int totaldbc=0;
+        int totaltbc=0;
+        int totalibt=0;
+        int totaldbt=0;
+        int totaltbt=0;
+        int totaltobc=0;
+        int totaltobt=0;
+        for(Kizuna2 kizuna2:kizuna2List){
+            List<Object> list = new ArrayList<>();
+            list.add(kizuna2.no);
+            list.add(kizuna2.total);
+            list.add(kizuna2.ibc);
+            list.add(kizuna2.ibt);
+            list.add(kizuna2.dbc);
+            list.add(kizuna2.dbt);
+            list.add(kizuna2.tbc);
+            list.add(kizuna2.tbt);
+            list.add(kizuna2.getToBC());
+            list.add(kizuna2.getToBT());
+            list.add(kizuna2.rate);
+            list.add(kizuna2.hamariG);
+            list.add(kizuna2.hamariBc);
+            //list.add(kizuna2.diff);
+            objectList.add(list);
+            
+            totalTotal+=kizuna2.total;
+            totalibc+=kizuna2.ibc;
+            totaldbc+=kizuna2.dbc;
+            totaltbc+=kizuna2.tbc;
+            totalibt+=kizuna2.ibt;
+            totaldbt+=kizuna2.dbt;
+            totaltbt+=kizuna2.tbt;
+            totaltobc+=kizuna2.getToBC();
+            totaltobt+=kizuna2.getToBT();
+        }
+        List<Object> totalList = new ArrayList<>();
+        totalList.add("");
+        totalList.add(totalTotal);
+        totalList.add(totalibc);
+        totalList.add(totalibt);
+        totalList.add(totaldbc);
+        totalList.add(totaldbt);
+        totalList.add(totaltbc);
+        totalList.add(totaltbt);
+        totalList.add(totaltobc);
+        totalList.add(totaltobt);
+
+        objectList.add(totalList);
+      
+        return objectList;
+    } 
+
+    static public  List<Saraban2>  getSaraban2List(Map<Integer,List<Map<String,String>>> historys) {
+        Iterator<Integer> NOItr = historys.keySet().iterator();
+        List<Saraban2> saraban2List = new ArrayList<>();
+        while (NOItr.hasNext()){
+            Saraban2 saraban2 = new Saraban2();
+            saraban2.no = NOItr.next();
+            Iterator<Map<String,String>> historyItr = historys.get(saraban2.no).iterator();
+            String pre="";
+            while (historyItr.hasNext()){
+                Map<String,String> history = historyItr.next();
+                if(!history.get("cnt").equals("end")){
+                    if(Integer.parseInt(history.get("start"))>2){
+                        saraban2.total+=Integer.parseInt(history.get("start"));
+                        if(history.get("sts").equals("BIG")){
+                            saraban2.bb+=1;
+                            pre="BB";
+                        }else if(history.get("sts").equals("REG")){
+                            saraban2.nrb+=1;
+                            pre="RB";
+                        }else{
+                            saraban2.hamariG=Integer.parseInt(history.get("start"));
+                        }
+                    }else if(history.get("sts").equals("REG") && pre.equals("BB") ){
+                        saraban2.rb+=1;
+                        pre="RB";
+                    }
+                }
+                else{
+                    saraban2.total+=Integer.parseInt(history.get("start"));
+                    saraban2.hamariG+=Integer.parseInt(history.get("start"));
+                }
+            }
+            saraban2List.add(saraban2);
+        }
+        return saraban2List;
     }
 
-//    static public  OutData kizuna2(Map<Integer,List<Map<String,String>>> historys) {
-//
-//
-//        List<Column> columns = new ArrayList<>();
-//        String[] headerName = {"NO","Total","IBC","IBT","DBC","DBT","TBC","TBT","toBC","toBT","RATE","HG","HBC"};
-//        for (String s:headerName){
-//            switch (s){
-//                case "NO":
-//                    Column column1 = new Column();
-//                    column1.name= s;
-//                    column1.total=false;
-//                    column1.width=80;
-//                    columns.add(column1);
-//                    break;
-//                case "Total":
-//                    Column column2 = new Column();
-//                    column2.name= s;
-//                    column2.total=true;
-//                    column2.width=150;
-//                    columns.add(column2);
-//                    break;
-//                case "IBC":
-//                case "DBC":
-//                case "TBC":
-//                case "IBT":
-//                case "DBT":
-//                case "TBT":
-//                case "toBC":
-//                case "toBT":
-//                    Column column3 = new Column();
-//                    column3.name= s;
-//                    column3.total=true;
-//                    column3.width=80;
-//                    columns.add(column3);
-//                    break;
-//                case "RATE":
-//                case "HG":
-//                    Column column4 = new Column();
-//                    column4.name= s;
-//                    column4.total=false;
-//                    column4.width=150;
-//                    columns.add(column4);
-//                    break;
-//                case "HBC":
-//                    Column column5 = new Column();
-//                    column5.name= s;
-//                    column5.total=false;
-//                    column5.width=80;
-//                    columns.add(column5);
-//                    break;
-//
-//            }
-//        }
-//
-//        OutData outData = new OutData();
-//        outData.columns = columns;
-//
-//        Map<Integer,Map<String,Integer>> dataMap = new TreeMap<>();
-//        List<Column> columns1 = new ArrayList<>();
-//        Iterator<Integer> NOItr = historys.keySet().iterator();
-//        while (NOItr.hasNext()){
-//            int NO = NOItr.next();
-//            Iterator<Map<String,String>> historyItr = historys.get(NO).iterator();
-//            Map<String,Integer> mapFI = new LinkedHashMap<>();
-//            String pre="";
-//            int totalGame = 0;
-//            int IBC = 0;
-//            int DBC = 0;
-//            int TBC = 0;
-//            int IBT = 0;
-//            int DBT = 0;
-//            int TBT = 0;
-//            int toBC = 0;
-//            int toBT = 0;
-//            int RATE = 0;
-//            int hamariG = 0;
-//            int hamariBC = 0;
-//
-//            while (historyItr.hasNext()) {
-//                Map<String, String> history = historyItr.next();
-//                if (!history.get("cnt").equals("end")) {
-//                    if (Integer.parseInt(history.get("start")) > 1) {
-//                        totalGame += Integer.parseInt(history.get("start"));
-//                        hamariG += Integer.parseInt(history.get("start"));
-//                        hamariBC += 1;
-//                        if (hamariG > 805) {
-//                            hamariG = 0;
-//                            hamariBC = 0;
-//                            TBC+=1;
-//                            pre="TBC";
-//                        } else {
-//                            if(Integer.parseInt(history.get("out"))>34){
-//                                DBC+=1;
-//                                pre="DBC";
-//                            }else{
-//                                IBC+=1;
-//                                pre="IBC";
-//                            }
-//                        }
-//                        RATE+=Double.parseDouble(history.get("start")) * 0.144 + 26.7;
-//                        toBC+=1;
-//                    }else{
-//                        hamariG=0;
-//                        hamariBC=0;
-//                        if(!pre.equals("BT")){
-//                            if (pre.equals("TBC")){
-//                                TBT+=1;
-//                                pre="BT";
-//                            }else if(pre.equals("DBC")){
-//                                DBT+=1;
-//                                pre="BT";
-//                            }else{
-//                                IBT+=1;
-//                                pre="BT";
-//                            }
-//                            toBT+=1;
-//                        }
-//                    }
-//                } else {
-//                    totalGame += Integer.parseInt(history.get("start"));
-//                    hamariG += Integer.parseInt(history.get("start"));
-//                }
-//            }
-//            Column column = new Column();
-//            column.name =
-//            mapFI.put("TOTAL",totalGame);
-//            mapFI.put("IBC",IBC);
-//            mapFI.put("IBT",IBT);
-//            mapFI.put("DBC",DBC);
-//            mapFI.put("DBT",DBT);
-//            mapFI.put("TBC",TBC);
-//            mapFI.put("TBT",TBT);
-//            mapFI.put("toBC",toBC);
-//            mapFI.put("toBT",toBT);
-//            mapFI.put("RATE",RATE);
-//            mapFI.put("HG",hamariG);
-//            mapFI.put("HBC",hamariBC);
-//            dataMap.put(NO,mapFI);
-//        }
-//
-//        outData.data = dataMap;
-//        return outData;
-//    }
+    static public List<List<Object>> genSaraban2Table(List<Saraban2>saraban2List){
+        List<List<Object>> objectList = new ArrayList<>();
+        int totalTotal=0;
+        int totalbb=0;
+        int totalrb=0;
+        int totalnrb=0;
 
-//    static public  OutData  saraban2(Map<Integer,List<Map<String,String>>> historys) {
-//        Map<String,Map<String,Object>> headerMap = new LinkedHashMap<>();
-//        Map<String,Object> headerMapdetail = new HashMap<>();
-//        headerMapdetail.put("width","80");
-//        headerMap.put("NO",headerMapdetail);
-//        headerMapdetail = new HashMap<>();
-//        headerMapdetail.put("width","130");
-//        headerMap.put("TOTAL",headerMapdetail);
-//        headerMapdetail = new HashMap<>();
-//        headerMapdetail.put("width","80");
-//        headerMap.put("BB",headerMapdetail);
-//        headerMap.put("RB",headerMapdetail);
-//        headerMap.put("NRB",headerMapdetail);
-//        headerMapdetail = new HashMap<>();
-//        headerMapdetail.put("width","130");
-//        headerMap.put("LAST",headerMapdetail);
-//        OutData outData = new OutData();
-//        outData.headerData = headerMap;
-//
-//        Map<Integer,Map<String,Integer>> mapNOs = new TreeMap<>();
-//        Iterator<Integer> NOItr = historys.keySet().iterator();
-//        while (NOItr.hasNext()){
-//            int NO = NOItr.next();
-//            Iterator<Map<String,String>> historyItr = historys.get(NO).iterator();
-//            Map<String,Integer> mapFI = new LinkedHashMap<>();
-//            String pre="";
-//            int totalGame = 0;
-//            int firstLukyBB = 0;
-//            int firstLukyRB = 0;
-//            int rushFromBB = 0;
-//            int lastG = 0;
-//            while (historyItr.hasNext()){
-//                Map<String,String> history = historyItr.next();
-//                if(!history.get("cnt").equals("end")){
-//                    if(Integer.parseInt(history.get("start"))>2){
-//                        totalGame+=Integer.parseInt(history.get("start"));
-//                        if(history.get("sts").equals("BIG")){
-//                            firstLukyBB+=1;
-//                            pre="BB";
-//                        }else if(history.get("sts").equals("REG")){
-//                            firstLukyRB+=1;
-//                            pre="RB";
-//                        }else{
-//                            lastG=Integer.parseInt(history.get("start"));
-//                        }
-//                    }else if(history.get("sts").equals("REG") && pre.equals("BB") ){
-//                        rushFromBB+=1;
-//                        pre="RB";
-//                    }
-//                }
-//                else{
-//                    totalGame+=Integer.parseInt(history.get("start"));
-//                }
-//            }
-//            mapFI.put("Total",totalGame);
-//            mapFI.put("BB",firstLukyBB);
-//            mapFI.put("RB",rushFromBB);
-//            mapFI.put("NRB",firstLukyRB);
-//            mapFI.put("LastG",lastG);
-//            mapNOs.put(NO,mapFI);
-//        }
-//        outData.data = mapNOs;
-//        return outData;
-//    }
+        for(Saraban2 saraban2:saraban2List){
+            List<Object> list = new ArrayList<>();
+            list.add(saraban2.no);
+            list.add(saraban2.total);
+            list.add(saraban2.bb);
+            list.add(saraban2.rb);
+            list.add(saraban2.nrb);
+            list.add(saraban2.hamariG);
+            //list.add(kizuna2.diff);
+            objectList.add(list);
+
+            totalTotal+=saraban2.total;
+            totalbb+=saraban2.bb;
+            totalrb+=saraban2.rb;
+            totalnrb+=saraban2.nrb;
+        }
+        List<Object> totalList = new ArrayList<>();
+        totalList.add("");
+        totalList.add(totalTotal);
+        totalList.add(totalbb);
+        totalList.add(totalrb);
+        totalList.add(totalnrb);
+
+        objectList.add(totalList);
+
+        return objectList;
+    }
 }

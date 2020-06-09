@@ -17,20 +17,22 @@ public class GetHistoryThread extends Thread {
     String hallNO;
     List<String>unitNOs;
     CallbackInstance callbackInstance;
+    int date;
 
     interface CallbackInstance{
         void callbackMethod(Map<Integer,List<Map<String,String>>> map) throws IllegalAccessException;
     }
 
-    public GetHistoryThread setCallbackInstance(String hallNO,List<String>unitNOs,CallbackInstance callbackInstance){
+    public GetHistoryThread setCallbackInstance(String hallNO,List<String>unitNOs,int date,CallbackInstance callbackInstance){
         this.hallNO=hallNO;
         this.unitNOs=unitNOs;
+        this.date=date;
         this.callbackInstance=callbackInstance;
         return this;
     }
     @Override
     public void run() {
-        Map<Integer,List<Map<String,String>>> map = getHistorys(hallNO,unitNOs);
+        Map<Integer,List<Map<String,String>>> map = getHistorys(hallNO,unitNOs,date);
         try {
             callbackInstance.callbackMethod(map);
         } catch (IllegalAccessException e) {
@@ -38,10 +40,10 @@ public class GetHistoryThread extends Thread {
         }
     }
 
-    static public Map<Integer,List<Map<String,String>>> getHistorys(String hallNO,List<String> unitNOs){
+    static public Map<Integer,List<Map<String,String>>> getHistorys(String hallNO,List<String> unitNOs,int date){
         Map<Integer,List<Map<String,String>>>historys  = new HashMap<>();
         for(String unitNO:unitNOs){
-            String url = "https://papimo.jp/h/"+hallNO+ "/hit/view/"+ unitNO + "/20200607";
+            String url = "https://papimo.jp/h/"+hallNO+ "/hit/view/"+ unitNO + "/" + String.valueOf(date);
             List<Map<String,String>> historyList = new ArrayList<>();
             try{
                 Document document = Jsoup.connect(url).timeout(10000).get();

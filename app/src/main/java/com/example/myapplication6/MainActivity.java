@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 
 import java.util.Calendar;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         LinearLayout baseLayout = findViewById(R.id.baselayout);
 
 
@@ -38,15 +38,13 @@ public class MainActivity extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         Global.date =Integer.parseInt(simpleDateFormat.format(calendar.getTime()));
 
-        Bundle bundle = new Bundle();
-        bundle.putInt("DATE",Global.date);
 
         Handler handler = new Handler();
 
         AppDatabase appDatabase = AppDatabaseSingleton.getInstance(this);
 
         Button Totalbutton = new Button(this);
-        Totalbutton.setText("差玉");
+        Totalbutton.setText("total差玉表示");
         Totalbutton.setOnClickListener((v)->{
             Intent intent = new Intent(this, TotalActivity.class);
             startActivity(intent);
@@ -64,10 +62,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
-
         Button updateModelButton = new Button(this);
-        updateModelButton.setText("機種LIST更新");
+        updateModelButton.setText("機種リスト更新");
         updateModelButton.setOnClickListener((v)->{
             new UpdateModelTableThread(this,handler,appDatabase,"00041817", new String[]{"1-20-268759", "0-4-268758"}).start();
         });
@@ -76,19 +72,9 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        LinearLayout layout1 = new LinearLayout(this);
-        LinearLayout layout2= new LinearLayout(this);
-        LinearLayout layout3= new LinearLayout(this);
+        baseLayout.addView(modelListButton);
+        baseLayout.addView(updateModelButton);
 
-        layout1.setOrientation(LinearLayout.HORIZONTAL);
-        layout2.setOrientation(LinearLayout.HORIZONTAL);
-        layout3.setOrientation(LinearLayout.HORIZONTAL);
-
-        layout1.addView(modelListButton);
-        layout1.addView(updateModelButton);
-
-        baseLayout.addView(layout1);
-        baseLayout.addView(layout2);
 
     }
 }

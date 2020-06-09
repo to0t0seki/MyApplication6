@@ -31,7 +31,7 @@ public class DiffFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Bundle bundle = getArguments();
-        int date = bundle.getInt("DATE");
+        int date = bundle.getInt("date");
         String status = bundle.getString("status");
         Handler handler = new Handler();
         AppDatabase appDatabase = AppDatabaseSingleton.getInstance(getActivity());
