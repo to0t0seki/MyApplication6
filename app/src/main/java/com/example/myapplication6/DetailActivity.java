@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Gravity;
-import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -14,14 +13,12 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProvider;
+
 
 import com.example.myapplication6.Data.Kizuna2;
 import com.example.myapplication6.Data.Saraban2;
 
 import java.util.List;
-import java.util.Map;
 
 public class DetailActivity extends AppCompatActivity {
     Handler handler;
@@ -71,9 +68,11 @@ public class DetailActivity extends AppCompatActivity {
             new GetHistoryThread().setCallbackInstance(hallNo,unitNOs,date,(historys)->{
                 List<Saraban2>saraban2s  =  GenerateOutData.getSaraban2List(historys);
                 List<List<Object>> saraban2TableData = GenerateOutData.genSaraban2Table(saraban2s);
-                TableLayout tableLayout = createTableObject(saraban2TableData);
-                List<TableHeader.Header>headers = TableHeader.creatSaraban2Header();
-                TableRow tableRow =TableHeader.creatTableRow(this,headers);
+                TableLayout tableLayout = CreateTableData.createTableLayout(this,saraban2TableData);
+                String[] names = {"NO","total","BB","RB","NRB","HG"};
+                int[] widths = {80,150,80,80,80,150};
+                List<CreateTableData.Header>headers = CreateTableData.createHeaderList(names,widths);
+                TableRow tableRow =CreateTableData.creatTableRow(this,headers);
                 tableLayout.addView(tableRow,0);
                 handler.post(()->{
                     linearLayout.removeAllViews();
@@ -89,9 +88,11 @@ public class DetailActivity extends AppCompatActivity {
             new GetHistoryThread().setCallbackInstance(hallNo,unitNOs,date,(historys)->{
                 List<Kizuna2> kizuna2s =  GenerateOutData.getkizuna2List(historys);
                 List<List<Object>> kizuna2TableData = GenerateOutData.genKizuna2Table(kizuna2s);
-                TableLayout tableLayout = createTableObject(kizuna2TableData);
-                List<TableHeader.Header>headers = TableHeader.creatKizuna2Header();
-                TableRow tableRow =TableHeader.creatTableRow(this,headers);
+                TableLayout tableLayout = CreateTableData.createTableLayout(this,kizuna2TableData);
+                String[] names ={"NO","total","IBC","IBT","DBC","DBT","TBC","TBT","toBC","toBT","RATE","HG","HBC"};
+                int[] widths ={80,150,80,80,80,80,80,80,80,80,150,100,80};
+                List<CreateTableData.Header>headers = CreateTableData.createHeaderList(names,widths);
+                TableRow tableRow =CreateTableData.creatTableRow(this,headers);
                 tableLayout.addView(tableRow,0);
                 handler.post(()->{
                     linearLayout.removeAllViews();
@@ -103,10 +104,12 @@ public class DetailActivity extends AppCompatActivity {
 
     public void getJag(String hallNo,String modelNo,int date){
         new GetIndex_sort(hallNo,modelNo,date,(tableList)->{
-            TableLayout tableLayout = createTableObject(tableList);
+            TableLayout tableLayout = CreateTableData.createTableLayout(this,tableList);
             handler.post(()->{
-                List<TableHeader.Header> headers = TableHeader.creatIndex_sortHeader();
-                TableRow tableRow = TableHeader.creatTableRow(this,headers);
+                String[] names = {"NO","total","BB","RB","diff","1k/G"};
+                int[] widths = {80,150,80,80,150,150};
+                List<CreateTableData.Header> headers = CreateTableData.createHeaderList(names,widths);
+                TableRow tableRow = CreateTableData.creatTableRow(this,headers);
                 tableLayout.addView(tableRow,0);
                 linearLayout.addView(tableLayout);
             });
@@ -135,21 +138,5 @@ public class DetailActivity extends AppCompatActivity {
         return tableLayout;
     }
 
-    public TableLayout createTableObject(List<List<Object>> tableList){
 
-        TableLayout tableLayout = new TableLayout(this);
-
-        for(List<Object>list :tableList){
-            TableRow tableRow = new TableRow(this);
-            for(Object data:list){
-                TextView textView = new TextView(this);
-                textView.setText(String.valueOf(data));
-                textView.setBackgroundResource(R.drawable.border);
-                textView.setGravity(Gravity.RIGHT);
-                tableRow.addView(textView);
-            }
-            tableLayout.addView(tableRow);
-        }
-        return tableLayout;
-    }
 }

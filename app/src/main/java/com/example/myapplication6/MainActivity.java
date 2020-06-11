@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
@@ -17,8 +18,10 @@ import com.example.myapplication6.Database.AppDatabase;
 import com.example.myapplication6.Database.AppDatabaseSingleton;
 
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 
 import java.util.Calendar;
@@ -42,7 +45,11 @@ public class MainActivity extends AppCompatActivity {
         Handler handler = new Handler();
 
         AppDatabase appDatabase = AppDatabaseSingleton.getInstance(this);
-
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         Button Totalbutton = new Button(this);
         Totalbutton.setText("total差玉表示");
         Totalbutton.setOnClickListener((v)->{
@@ -69,12 +76,22 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
-
-
         baseLayout.addView(modelListButton);
         baseLayout.addView(updateModelButton);
 
+        Button button = new Button(this);
+        button.setOnClickListener((v)->{
+            try {
+                aa();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            });
+        baseLayout.addView(button);
 
+    }
+
+    public void aa()throws Exception{
+      throw   new Exception();
     }
 }

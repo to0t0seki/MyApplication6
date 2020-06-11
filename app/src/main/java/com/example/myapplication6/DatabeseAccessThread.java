@@ -16,7 +16,7 @@ public class DatabeseAccessThread extends Thread {
     CallbackInstance callbackInstance;
 
     interface CallbackInstance{
-        void callbackMethod(List<?> list);
+        void callbackMethod(List<TotalIO> list);
     }
 
     public DatabeseAccessThread setCallbackInsetance(AppDatabase appDatabase,int date,String status,CallbackInstance callbackInsetance){
@@ -30,7 +30,7 @@ public class DatabeseAccessThread extends Thread {
 
     @Override
     public void run() {
-        List<?> list;
+        List<TotalIO> list;
         if(status=="slot"){
             list = appDatabase.allDao().querySlotDATE(date);
         }else {

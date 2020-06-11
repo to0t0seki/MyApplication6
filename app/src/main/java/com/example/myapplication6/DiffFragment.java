@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.myapplication6.Database.AppDatabase;
 import com.example.myapplication6.Database.AppDatabaseSingleton;
+import com.example.myapplication6.Database.TotalIO;
 
 
 import java.lang.reflect.Field;
@@ -44,11 +45,7 @@ public class DiffFragment extends Fragment {
         new DatabeseAccessThread().setCallbackInsetance(appDatabase,date,status,(list)->{
             handler.post(()->{
                 TableLayout tableLayout = new TableLayout(getActivity());
-                try {
-                    tableLayout = creatTable(list);
-                }catch (IllegalAccessException e){
-                    System.out.println(e);
-                }
+                tableLayout = creatTable(list);
                 linearLayout.removeAllViews();
                 linearLayout.addView(tableLayout);
             });
@@ -57,57 +54,32 @@ public class DiffFragment extends Fragment {
         return scrollView;
     }
 
-    public  TableLayout creatTable(List list) throws IllegalAccessException {
 
-        TableRow tableHeader = new TableRow(getActivity());
-        Field[] fields = list.get(0).getClass().getFields();
+    public  TableLayout creatTable(List<TotalIO> list)  {
 
-        for(Field f:fields){
-            TextView textView = new TextView(getActivity());
-            textView.setBackgroundResource(R.drawable.border);
-            switch (f.getName()) {
-                case "modelNAME":
-                    textView.setText("機種名");
-                    textView.setWidth(250);
-                    tableHeader.addView(textView,0);
-                    break;
-                case "diff":
-                    textView.setText("差玉");
-                    textView.setWidth(150);
-                    textView.setGravity(Gravity.RIGHT);
-                    tableHeader.addView(textView);
-                    break;
-            }
-        }
         TableLayout tableLayout = new TableLayout(getActivity());
+        TableRow tableHeader = new TableRow(getActivity());
+        String[] names = {"機種名","差玉"};
+        int[] widths = {250,150};
+        List<CreateTableData.Header>headers =  CreateTableData.createHeaderList(names,widths);
+        for (CreateTableData.Header header:headers){
+            TextView textView = CreateTableData.creatTextViewHeader(getActivity(),header);
+            tableHeader.addView(textView);
+        }
         tableLayout.addView(tableHeader);
 
         int diffTotal=0;
-        for (Object o:list){
-            TableRow tableRow = new TableRow(getActivity());
-            for(Field f:fields) {
-                TextView textView = new TextView(getActivity());
-                textView.setBackgroundResource(R.drawable.border);
-                String s=null;
-                int i =f.get(o).toString().length();
-                if(f.get(o).toString().length()>15){
-                    s = f.get(o).toString().substring(0,16);
-                }else {
-                    s = f.get(o).toString();
-                }
-                textView.setText(s);
 
-                switch (f.getName()) {
-                    case "modelNAME":
-                        tableRow.addView(textView,0);
-                        break;
-                    case "diff":
-                        textView.setGravity(Gravity.RIGHT);
-                        tableRow.addView(textView);
-                        diffTotal+=Integer.parseInt(s);
-                        break;
-                }
+        for (TotalIO totalIO:list) {
+            TableRow tableRow = new TableRow(getActivity());
+            if(totalIO.modelNAME.length()>15){
+                totalIO.modelNAME = totalIO.modelNAME.substring(0,14);
             }
+            TextView textView1 = CreateTableData.creatTextViewData(getActivity(),totalIO.modelNAME);
+            TextView textView2 = CreateTableData.creatTextViewData(getActivity(),String.valueOf(totalIO.diff));
+            diffTotal+=totalIO.diff;
+            tableRow.addView(textView1);
+            tableRow.addView(textView2);
             tableLayout.addView(tableRow);
         }
 
@@ -115,10 +87,9 @@ public class DiffFragment extends Fragment {
         TextView textView1 = new TextView(getActivity());
         textView1.setBackgroundResource(R.drawable.border);
         textView1.setText("合計");
-        TextView textView2 = new TextView(getActivity());
-        textView2.setBackgroundResource(R.drawable.border);
-        textView2.setText(String.valueOf(diffTotal));
-        textView2.setGravity(Gravity.RIGHT);
+        textView1.setGravity(Gravity.CENTER);
+
+        TextView textView2 = CreateTableData.creatTextViewData(getActivity(),String.valueOf(diffTotal));
         totalRow.addView(textView1);
         totalRow.addView(textView2);
         tableLayout.addView(totalRow,1);
